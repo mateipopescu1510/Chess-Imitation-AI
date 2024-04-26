@@ -1,36 +1,55 @@
 import berserk
-import datetime
+
 import json
+import pandas as pd
+import os
+
+USER = "matei_popescu1510"
+JSON_DIR_PATH = "./games_json/"
+CSV_DIR_PATH = "./games_csv/"
 
 client = berserk.Client()
 
-
-# start = berserk.utils.to_millis(datetime(2021, 1, 1))
-
-# end = berserk.utils.to_millis(datetime(2024, 4, 24))
-
 games = list(
     client.games.export_by_player(
-        "Matei_Popescu1510",
+        USER,
         max=10,
         rated=True,
         perf_type="bullet,blitz,rapid",
-        sort="dateAsc",
+        # sort="dateAsc",
         pgn_in_json=True,
     )
 )
-print(games[1])
 
-path = "./games/test.json", "w"
-with open("./games/test.json", "w") as path:
-    json.dump(games[1], path, default=str, sort_keys=True)
+for game in games:
+    if "15. " not in game["pgn"] or game["createdAt"].year < 2021:
+        continue
+    game_id = JSON_DIR_PATH + game["id"] + ".json"
+    # print(game_id)
+    with open(game_id, "w") as path:
+        json.dump(game, path, default=str, sort_keys=True)
 
 
-# TODO exclude games with less than 15 moves
-# TODO exclude games earlier than 2021
-print("15" in games[1]["pgn"])
-print(games[1]["createdAt"].year > 2020)
-# for index, game in enumerate(games):
-#     path = "./games/game" + str(index) + ".pgn"
-#     g = open(path, "w", encoding="utf8")
-#     g.write(game)
+# for game in games:
+#     if "15" not in game["pgn"] or game["createdAt"].year < 2021:
+#         continue
+#     id = game["id"]
+#     moves = game["moves"]
+#     pgn = game["pgn"]
+#     white_id = game["players"]["white"]["user"]["id"]
+#     white_elo = game["players"]["white"]["rating"]
+#     black_id = game["players"]["black"]["user"]["id"]
+#     black_elo = game["players"]["black"]["rating"]
+#     winner = game["winner"]
+#     print(id, white_id, white_elo, black_id, black_elo, winner)
+
+
+# TODO turn games into CSV containing id, moves, pgn, blackId, blackRating, whiteId, whiteRating, winner
+# TODO extract opening code from PGN to put in CSV
+
+for filename in os.listdir(JSON_DIR_PATH):
+    with open(os.path.join(JSON_DIR_PATH, filename), "r") as game_json:
+        game = json.load(game_json)
+        print(game["pgn"])
+
+    break
