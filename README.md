@@ -1,3 +1,10 @@
+# Chess Imitation AI
+This is my attempt of creating an AI model that learns how to play chess in *my style*. That includes:
+- relative strength
+- opening choice
+- balance between positional and dynamic play
+
+Development is still in its early stages, with progress documented at each step.
 ### Backlog of development progress
 
 >### 25/04
