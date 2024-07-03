@@ -1,2 +1,5 @@
 games_json
-python_chess_test.ipynb
+test.ipynb
+ideas.txt
+.vscode
+__pycache__
