@@ -8,18 +8,25 @@ Development is still in its early stages, with progress documented at each step.
 ### Backlog of development progress
 
 >### 25/04
->
->- exported lichess games in bulk as *.json* files
+>- [exported](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/src/export_games.py) lichess games in bulk as *.json* files
 >- excluded games before 2021 and with less than 15 moves
 
 >### 26/04
->
 >- formatted games into *.csv* file
 >- experimenting with [python-chess](https://python-chess.readthedocs.io/en/latest/), integrated own games with python-chess display
 >- experimenting with [stockfish](https://pypi.org/project/stockfish/)
 >- converted moves from *SAN* notation (```e4 c5 Nf3 d6```) to *UCI* notation (```e2e4 c7c5 g1f3 d7d6```) necessary for integration with chess engines
 
 >### 29/04
->
->- generated all individual positions from each game using the moves
+>- generated [dataset](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/data_old/dataset_old.csv) with all individual positions from each game using the moves
 >- paired each position with the move(s) I made from that point
+
+>### 3/07
+>- restructured files, included [all games](https://github.com/mateipopescu1510/Chess-Imitation-AI/tree/main/games_json) in JSON format as raw data
+>- expanded [dataset](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/data_old/dataset_evalbefore.csv) by evaluating every position reached with stockfish
+
+>### 5/07
+>- expanded [dataset](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/data/dataset.csv) by evaluating every position *before and after* my moves with stockfish
+>- included game phase for every position (```opening```, ```middlegame``` or ```endgame```) determined with simple [heuristics](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/src/positional_features.py) (with more in progress)
+>- converted move counter from each position into probability of a move being made
+>- included further information such as [opening code](https://en.wikipedia.org/wiki/List_of_chess_openings) and average ELO diff in every position reached 
