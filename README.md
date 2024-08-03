@@ -26,7 +26,16 @@ Development is still in its early stages, with progress documented at each step.
 >- expanded [dataset](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/data_old/dataset_evalbefore.csv) by evaluating every position reached with stockfish
 
 >### 5/07
->- expanded [dataset](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/data/dataset.csv) by evaluating every position *before and after* my moves with stockfish
+>- expanded [dataset](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/data_old/dataset_evalafter.csv) by evaluating every position *before and after* my moves with stockfish
 >- included game phase for every position (```opening```, ```middlegame``` or ```endgame```) determined with simple [heuristics](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/src/positional_features.py) (with more in progress)
 >- converted move counter from each position into probability of a move being made
 >- included further information such as [opening code](https://en.wikipedia.org/wiki/List_of_chess_openings) and average ELO diff in every position reached 
+
+>### 8/07
+>- restructured [dataset](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/data_old/dataset_kingdanger.csv) by including more columns for redundancy
+>- added *king danger* data, using information and heuristics from the [Chess Programming Wiki](https://www.chessprogramming.org/King_Safety) as inspiration
+
+>### 9/07
+>- expanded [dataset](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/data/dataset.csv) by including data about *open and semi-open file control*, *center control* with my own simplistic scoring system
+>- also added data about *pawn structure* - what I think to be one of the most important that determines how well I play a position; my style being more positional, with a preference for *closed* positions
+>   - by counting pawns and [ram formations](https://www.chessprogramming.org/Pawn_Rams_(Bitboards)), every position was classified as ```open```, ```semi-open```, ```semi-closed``` or ```closed```.

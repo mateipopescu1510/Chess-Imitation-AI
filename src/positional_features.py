@@ -1,29 +1,27 @@
 import chess
 
 delta_king_zone_central = [
-    -9,
-    -8,
-    -7,
-    -1,
-    0,
-    1,
-    7,
-    8,
-    9,
-    15,
-    16,
-    17,
-    23,
-    24,
-    25,
-    31,
-    32,
-    33,
+    -9, -8, -7,
+    -1, 0, 1,
+    7, 8, 9,
+    15, 16, 17,
+    23, 24, 25,
+    31, 32, 33,
 ]
-delta_king_zone_A8H1 = [-10, -9, -8, -2, -1,
-                        0, 6, 7, 8, 14, 15, 16, 23, 24, 31, 32]
-delta_king_zone_A1H8 = [-8, -7, -6, 0, 1,
-                        2, 8, 9, 10, 16, 17, 18, 24, 25, 32, 33]
+delta_king_zone_A8H1 = [
+    -10, -9, -8,
+    -2, -1, 0,
+    6, 7, 8,
+    14, 15, 16,
+    23, 24,
+    31, 32]
+delta_king_zone_A1H8 = [
+    -8, -7, -6,
+    0, 1, 2,
+    8, 9, 10,
+    16, 17, 18,
+    24, 25,
+    32, 33]
 
 pawn_shield_multiplier = {
     0: 1,
@@ -71,22 +69,10 @@ file_control_piece_multiplier = {chess.ROOK: 1.0, chess.QUEEN: 0.5}
 #     ]
 
 big_center = [
-    chess.C3,
-    chess.D3,
-    chess.E3,
-    chess.F3,
-    chess.C4,
-    chess.D4,
-    chess.E4,
-    chess.F4,
-    chess.C5,
-    chess.D5,
-    chess.E5,
-    chess.F5,
-    chess.C6,
-    chess.D6,
-    chess.E6,
-    chess.F6,
+    chess.C3, chess.D3, chess.E3, chess.F3,
+    chess.C4, chess.D4, chess.E4, chess.F4,
+    chess.C5, chess.D5, chess.E5, chess.F5,
+    chess.C6, chess.D6, chess.E6, chess.F6,
 ]
 
 
