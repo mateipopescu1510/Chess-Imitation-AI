@@ -92,17 +92,24 @@ def material(board, color):
     return material
 
 
+def material_difference(board):
+    white_material = material(board, chess.WHITE)
+    black_material = material(board, chess.BLACK)
+
+    return white_material - black_material
+
+
 def game_phase(board):
     if board.fullmove_number < 16:
-        return "opening"
+        return 0
 
     white_material = material(board, chess.WHITE)
     black_material = material(board, chess.BLACK)
 
     if white_material < 16 and black_material < 16:
-        return "endgame"
+        return 2
     else:
-        return "middlegame"
+        return 1
 
 
 def king_proximity_multiplier(distance):
@@ -187,16 +194,12 @@ def pawn_shield_score(board, color):
     return score
 
 
-def king_danger_score(board, user_side):
-    user_king_danger = king_zone_attackers_score(
-        board, user_side) * pawn_shield_score(board, user_side)
-    opponent_king_danger = king_zone_attackers_score(
-        board, not user_side) * pawn_shield_score(board, not user_side)
-    return (
-        round(user_king_danger, 2),
-        round(opponent_king_danger, 2),
-        round(opponent_king_danger - user_king_danger, 2),
-    )
+def king_danger_score_diff(board):
+    white_king_danger = king_zone_attackers_score(
+        board, chess.WHITE) * pawn_shield_score(board, chess.WHITE)
+    black_king_danger = king_zone_attackers_score(
+        board, chess.BLACK) * pawn_shield_score(board, chess.BLACK)
+    return round(black_king_danger - white_king_danger, 2)
 
 
 def square_control_score(board, square, color):
@@ -219,15 +222,15 @@ def square_control_score(board, square, color):
     return score
 
 
-def center_control_score(board, user_side):
-    score_user = 0
-    score_opponent = 0
+def center_control_score(board):
+    score_white = 0
+    score_black = 0
 
     for square in big_center:
-        score_user += square_control_score(board, square, user_side)
-        score_opponent += square_control_score(board, square, not user_side)
+        score_white += square_control_score(board, square, chess.WHITE)
+        score_black += square_control_score(board, square, chess.BLACK)
 
-    return score_user, score_opponent, score_user - score_opponent
+    return score_white - score_black
 
 
 def get_open_files(board):
@@ -266,13 +269,13 @@ def get_semi_open_files(board, color):
     return semi_open_files
 
 
-def file_control_score(board, user_side):
+def file_control_score(board: chess.Board):
     open_files = get_open_files(board)
-    user_semi_open_files = get_semi_open_files(board, user_side)
-    opponent_semi_open_files = get_semi_open_files(board, not user_side)
+    white_semi_open_files = get_semi_open_files(board, chess.WHITE)
+    black_semi_open_files = get_semi_open_files(board, chess.BLACK)
 
-    user_file_control_score = 0
-    opponent_file_control_score = 0
+    white_file_control_score = 0
+    black_file_control_score = 0
 
     for file in open_files:
         for rank in range(8):
@@ -281,34 +284,30 @@ def file_control_score(board, user_side):
             color = board.color_at(square)
             if piece in [chess.ROOK, chess.QUEEN]:
                 defenders = len(board.attackers(color, square))
-                if color == user_side:
-                    user_file_control_score += file_control_piece_multiplier[piece] * (
+                if color == chess.WHITE:
+                    white_file_control_score += file_control_piece_multiplier[piece] * (
                         1 + defenders)
                 else:
-                    opponent_file_control_score += file_control_piece_multiplier[piece] * (
+                    black_file_control_score += file_control_piece_multiplier[piece] * (
                         1 + defenders)
 
-    for file in user_semi_open_files:
+    for file in white_semi_open_files:
         for rank in range(8):
             square = chess.square(file, rank)
             piece = board.piece_type_at(square)
             color = board.color_at(square)
-            if piece in [chess.ROOK, chess.QUEEN] and color == user_side:
-                user_file_control_score += file_control_piece_multiplier[piece] * 0.5
+            if piece in [chess.ROOK, chess.QUEEN] and color == chess.WHITE:
+                white_file_control_score += file_control_piece_multiplier[piece] * 0.5
 
-    for file in opponent_semi_open_files:
+    for file in black_semi_open_files:
         for rank in range(8):
             square = chess.square(file, rank)
             piece = board.piece_type_at(square)
             color = board.color_at(square)
-            if piece in [chess.ROOK, chess.QUEEN] and color != user_side:
-                opponent_file_control_score += file_control_piece_multiplier[piece] * 0.5
+            if piece in [chess.ROOK, chess.QUEEN] and color == chess.BLACK:
+                black_file_control_score += file_control_piece_multiplier[piece] * 0.5
 
-    return (
-        user_file_control_score,
-        opponent_file_control_score,
-        user_file_control_score - opponent_file_control_score,
-    )
+    return white_file_control_score - black_file_control_score
 
 
 def pawn_structure(board):
@@ -330,6 +329,13 @@ def pawn_structure(board):
     2 - closed semiclosed or semiopen
     1 - semiopen or open
     '''
+    structure_type = {
+        'open': 0,
+        'semi-open': 1,
+        'semi-closed': 2,
+        'closed': 3
+    }
+
     num_pawns = 0
     for file in range(2, 6):
         for rank in range(1, 7):
@@ -347,22 +353,22 @@ def pawn_structure(board):
                 num_rams += 1
 
     if num_pawns <= 2:
-        return 'open'
+        return structure_type['open']
 
     if num_pawns <= 4:
         if num_rams == 2:
-            return 'semi-open'
-        return 'open'
+            return structure_type['semi-open']
+        return structure_type['open']
 
     if num_pawns == 5:
-        return 'semi-open'
+        return structure_type['semi-open']
 
     if num_pawns == 6:
         if num_rams >= 2:
-            return 'semi-closed'
-        return 'semi-open'
+            return structure_type['semi-closed']
+        return structure_type['semi-open']
 
     # if it gets here, num_pawns >= 7
     if num_rams >= 2:
-        return 'closed'
-    return 'semi-closed'
+        return structure_type['closed']
+    return structure_type['semi-closed']
