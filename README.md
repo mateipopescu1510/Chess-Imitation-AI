@@ -4,7 +4,6 @@ This is my attempt of creating an AI model that learns how to play chess in *my 
 - opening choice
 - balance between positional and dynamic play
 
-Development is still in its early stages, with progress documented at each step.
 ### Backlog of development progress
 
 >### 25/04
@@ -39,3 +38,15 @@ Development is still in its early stages, with progress documented at each step.
 >- expanded [dataset](https://github.com/mateipopescu1510/Chess-Imitation-AI/blob/main/data/dataset.csv) by including data about *open and semi-open file control*, *center control* with my own simplistic scoring system
 >- also added data about *pawn structure* - what I think to be one of the most important that determines how well I play a position; my style being more positional, with a preference for *closed* positions
 >   - by counting pawns and [ram formations](https://www.chessprogramming.org/Pawn_Rams_(Bitboards)), every position was classified as ```open```, ```semi-open```, ```semi-closed``` or ```closed```.
+
+>### 3/08
+>- encoded data necessary to be used with neural network training (boards, moves)
+>- created basic ResNet (residual neural network) with a variable number of residual layers
+
+>### 14/08
+>- reorganized files
+>- implemented custom function to evaluate all positions in the dataset, to be used in the model's training
+>- better move encoding and policy generation. enforced legal moves by using legal move masks both in training policies and model policy output
+>- improved model architecture to return both a *policy* and an *evaluation*
+>- created a search tree with *alpha beta pruning* to search based on the model's evaluation
+>- implemented a simple interface in pygame

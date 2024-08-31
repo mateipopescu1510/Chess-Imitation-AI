@@ -10,6 +10,7 @@ from model import Net
 from train import predict
 from stockfish import Stockfish
 from timeit import default_timer as timer
+import matplotlib.pyplot as plt
 
 stockfish = Stockfish(path='C:\Program Files\stockfish\stockfish-windows-x86-64-avx2.exe',
                       depth=7, parameters={'Threads': 4, 'Hash': 32})
@@ -64,29 +65,31 @@ class Node:
 
 
 class Tree:
-    def __init__(self, root_board: Board, net: Net, net_is_white=True, max_depth=6, n=3, device='cpu'):
+    def __init__(self, root_board: Board, net: Net, net_is_white=True, max_depth=6, n=3, device='cpu', transposition=True):
         self.root = Node(root_board)
         self.net = net
         self.net_is_white = net_is_white
         self.max_depth = max_depth
         self.n = n
         self.device = device
+        self.transposition = transposition
         self.transpositions = {}
 
     def alpha_beta_search(self, node: Node, depth, alpha, beta, maximizing):
-        board_hash = hash(node.board.fen())
-        if board_hash in self.transpositions:
-            # print('TRANSPOSITION')
-            entry = self.transpositions[board_hash]
-            if entry['depth'] >= depth:
-                if entry['type'] == 'exact':
-                    return entry['value']
-                elif entry['type'] == 'lower_bound':
-                    alpha = max(alpha, entry['value'])
-                elif entry['type'] == 'upper_bound':
-                    beta = min(beta, entry['value'])
-                if beta < alpha:
-                    return entry['value']
+        if self.transposition:
+            board_hash = hash(node.board.fen())
+            if board_hash in self.transpositions:
+                # print('TRANSPOSITION')
+                entry = self.transpositions[board_hash]
+                if entry['depth'] >= depth:
+                    if entry['type'] == 'exact':
+                        return entry['value']
+                    elif entry['type'] == 'lower_bound':
+                        alpha = max(alpha, entry['value'])
+                    elif entry['type'] == 'upper_bound':
+                        beta = min(beta, entry['value'])
+                    if beta < alpha:
+                        return entry['value']
 
         if depth == 0 or node.is_terminal():
             return node.evaluate(self.net, self.device)
@@ -120,13 +123,14 @@ class Tree:
 
         node.value = value
 
-        entry_type = 'exact'
-        if value < alpha:
-            entry_type = 'upper_bound'
-        elif value > beta:
-            entry_type = 'lower_bound'
-        self.transpositions[board_hash] = {
-            'value': value, 'depth': depth, 'type': entry_type}
+        if self.transposition:
+            entry_type = 'exact'
+            if value < alpha:
+                entry_type = 'upper_bound'
+            elif value > beta:
+                entry_type = 'lower_bound'
+            self.transpositions[board_hash] = {
+                'value': value, 'depth': depth, 'type': entry_type}
 
         return value
 
@@ -202,19 +206,54 @@ def game_loop(board: Board, net: Net, net_is_white: bool, max_depth=4, n=4, devi
     print('game over!')
 
 
-# device = 'cuda' if torch.cuda.is_available() else 'cpu'
-# # device = 'cpu'
-# net = Net().to(device)
-# print(net.load_state_dict(torch.load('./models/resd/res20d_300.pth')))
+# if __name__ == "__main__":
+#     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+#     net = Net().to(device)
+#     print(net.load_state_dict(torch.load('./models/resd/res20d_300.pth')))
+#     fen = 'rnb1k2r/pp3ppp/3bpn2/2pp4/3P1P2/1qPBP3/PP1N2PP/R1B1K1NR w KQkq - 0 8'
+#     board = Board(fen)
 
-# game_loop(Board(), net, net_is_white=True, max_depth=8, n=3, device=device)
-# tree = Tree(Board(), net, net_is_white=True, max_depth=10, n=3, device=device)
+#     depths = [2, 4, 6, 8, 10]
+#     times_transposition = []
+#     times_no_transposition = []
 
-# start = timer()
-# move, eval = tree.best_move()
-# end = timer()
+#     for depth in depths:
+#         tree_transposition = Tree(board, net, net_is_white=True,
+#                                   max_depth=depth, n=3, device=device, transposition=True)
+#         tree_no_transposition = Tree(
+#             board, net, net_is_white=True, max_depth=depth, n=3, device=device, transposition=False)
 
-# print(tree.root)
-# tree.print_tree(tree.root)
-# print(f'best move: {move}; evaluation: {eval:.2f}')
-# print(f'finished in {end - start:.2f}s')
+#         start = timer()
+#         move, eval = tree_transposition.best_move()
+#         end = timer()
+#         times_transposition.append(round(end - start, 2))
+
+#         start = timer()
+#         move, eval = tree_no_transposition.best_move()
+#         end = timer()
+#         times_no_transposition.append(round(end - start, 2))
+
+#         print(f'depth {depth} finished in {end - start:.2f}s')
+
+#     print(times_transposition)
+#     print(times_no_transposition)
+#     plt.figure(figsize=(10, 6))
+#     plt.plot(depths, times_transposition, label='time w/ transp. table')
+#     plt.plot(depths, times_no_transposition, label='time w/out transp. table')
+
+#     plt.xlabel('depth')
+#     plt.ylabel('time (seconds)')
+#     plt.title('time to expand tree to max depth')
+
+#     plt.legend()
+#     plt.show()
+#     # tree = Tree(Board(), net, net_is_white=True, max_depth=10, n=3, device=device)
+
+#     # start = timer()
+#     # move, eval = tree.best_move()
+#     # end = timer()
+
+#     # print(tree.root)
+#     # tree.print_tree(tree.root)
+#     # print(f'best move: {move}; evaluation: {eval:.2f}')
+#     # print(f'finished in {end - start:.2f}s')
